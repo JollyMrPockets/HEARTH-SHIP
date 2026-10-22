@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<!-- Hearth Log build v2 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RCS-1 Ops</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RCS-1 Ops">
+<meta name="theme-color" content="#0b0d10">
+<link rel="manifest" href="rcs1-manifest.json">
+<link rel="icon" href="rcs1-icon-192.png">
+<link rel="apple-touch-icon" href="rcs1-icon-192.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+:root{
+  --bg:#0f0b07;
+  --bg-2:#171009;
+  --surface:#161009;
+  --surface-2:#20160d;
+  --ink:#f2e8d6;
+  --ink-soft:#c2ac89;
+  --amber:#e0a24a;
+  --amber-deep:#b87d28;
+  --sage:#7a9a68;
+  --rust:#d1614a;
+  --line:#4a3a26;
+  --line-soft:rgba(224,162,74,0.22);
+  --font-display:'Fraunces', serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+}
+
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);}
+button{font-family:inherit;cursor:pointer;}
+input,select{font-family:inherit;}
+a{color:inherit;}
+
+#app{display:flex;min-height:100vh;}
+
+.sidebar{
+  width:220px;flex-shrink:0;background:var(--bg-2);border-right:1px solid var(--line-soft);
+  padding:28px 0;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh;
+}
+.brand{font-family:var(--font-display);font-size:1.5rem;font-weight:600;padding:0 24px 20px;letter-spacing:0.02em;color:#e8dcc4;}
+.brand span{color:var(--amber);}
+.nav-item{
+  display:flex;align-items:center;gap:12px;padding:12px 24px;color:#cbb99e;font-size:0.95rem;
+  border-left:3px solid transparent;transition:all .15s ease;background:none;border-top:none;border-right:none;border-bottom:none;text-align:left;width:100%;
+}
+.nav-item:hover{background:rgba(201,133,47,0.08);color:var(--surface);}
+.nav-item.active{color:var(--amber);border-left-color:var(--amber);background:rgba(201,133,47,0.1);font-weight:600;}
+.nav-icon{font-size:1.1rem;width:20px;text-align:center;}
+.sidebar-foot{margin-top:auto;padding:16px 24px 0;font-size:0.75rem;color:#7a6b57;}
+
+main{flex:1;background:var(--surface);color:var(--ink);min-height:100vh;padding:36px 40px 80px;overflow-x:hidden;}
+.page-title{font-family:var(--font-display);font-size:2rem;font-weight:600;margin:0 0 6px;}
+.page-sub{color:var(--ink-soft);margin:0 0 28px;font-size:0.95rem;}
+
+.card{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:10px;padding:24px;margin-bottom:20px;}
+.card h3{font-family:var(--font-display);font-size:1.3rem;margin:0 0 12px;font-weight:600;}
+.eyebrow{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber-deep);margin:0 0 6px;font-weight:600;}
+
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--amber);color:#2a1c0e;border:none;padding:11px 20px;border-radius:7px;font-weight:600;font-size:0.9rem;transition:transform .1s ease, background .15s ease;}
+.btn:hover{background:var(--amber-deep);color:#fff;}
+.btn:focus-visible, .nav-item:focus-visible, select:focus-visible, input:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);}
+.btn.ghost:hover{background:rgba(138,106,60,0.1);}
+.btn.small{padding:7px 14px;font-size:0.8rem;}
+.btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+.week-ribbon{display:flex;gap:4px;margin:18px 0 8px;flex-wrap:wrap;}
+.week-seg{flex:1;min-width:24px;height:34px;border-radius:5px;background:#2c2013;position:relative;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--ink-soft);border:1px solid var(--line-soft);}
+.week-seg.past{background:var(--amber-deep);color:#fff2df;border-color:var(--amber-deep);}
+.week-seg.current{background:var(--amber);color:#2a1c0e;border-color:var(--amber-deep);font-weight:700;box-shadow:0 0 0 2px rgba(201,133,47,0.3);}
+.week-seg.current::after{content:"🔥";position:absolute;top:-16px;font-size:0.9rem;}
+
+.banner{border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;font-size:0.92rem;}
+.banner.alert{background:rgba(177,71,47,0.12);border:1px solid rgba(177,71,47,0.4);}
+.banner.info{background:rgba(201,133,47,0.12);border:1px solid rgba(201,133,47,0.4);}
+.banner.done{background:rgba(111,138,92,0.15);border:1px solid rgba(111,138,92,0.4);}
+.banner.error{background:rgba(177,71,47,0.18);border:1px solid var(--rust);}
+.banner b{display:block;margin-bottom:2px;font-family:var(--font-display);font-size:1.05rem;}
+
+.grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;}
+
+ol.steps{padding-left:20px;margin:8px 0;}
+ol.steps li{margin-bottom:8px;line-height:1.5;font-size:0.93rem;}
+ul.plain{padding-left:20px;margin:8px 0;}
+ul.plain li{margin-bottom:6px;line-height:1.5;font-size:0.93rem;}
+
+.tag{display:inline-block;background:rgba(138,106,60,0.15);border:1px solid var(--line-soft);padding:2px 10px;border-radius:20px;font-size:0.75rem;color:var(--ink-soft);margin-right:6px;}
+
+table.grocery{width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:10px;}
+table.grocery th{text-align:left;font-family:var(--font-mono);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-soft);border-bottom:1px solid var(--line-soft);padding:6px 8px;}
+table.grocery td{padding:6px 8px;border-bottom:1px solid var(--line-soft);}
+table.grocery tr:last-child td{font-weight:700;border-bottom:none;padding-top:10px;}
+
+.plan-card{border:1px solid var(--line-soft);border-radius:10px;background:var(--surface-2);margin-bottom:16px;overflow:hidden;}
+.plan-head{padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+.plan-head h3{margin:0;font-family:var(--font-display);font-size:1.25rem;}
+.plan-head p{margin:4px 0 0;color:var(--ink-soft);font-size:0.88rem;}
+.plan-body{padding:0 22px 22px;display:none;border-top:1px solid var(--line-soft);}
+.plan-body.open{display:block;padding-top:16px;}
+.recipe-block{margin-bottom:18px;}
+.recipe-block h4{font-family:var(--font-display);font-size:1.05rem;margin:0 0 4px;}
+
+.chore-table{width:100%;border-collapse:collapse;margin-top:8px;}
+.chore-table td, .chore-table th{padding:10px 12px;border-bottom:1px solid var(--line-soft);font-size:0.88rem;vertical-align:top;}
+.chore-table th{font-family:var(--font-mono);font-size:0.7rem;text-transform:uppercase;color:var(--ink-soft);text-align:left;}
+.chore-table tr.today{background:rgba(201,133,47,0.15);}
+.chore-table tr.today td:first-child{font-weight:700;color:var(--amber-deep);}
+
+.payday-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:14px;}
+.payday-pill{border:1px solid var(--line-soft);border-radius:8px;padding:10px 12px;font-family:var(--font-mono);font-size:0.82rem;text-align:center;}
+.payday-pill.next{background:var(--amber);color:#2a1c0e;border-color:var(--amber-deep);font-weight:700;}
+.payday-pill.past{opacity:0.45;}
+
+.field-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin:14px 0;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:0.78rem;color:var(--ink-soft);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.04em;}
+.field input, .field select{padding:9px 12px;border-radius:6px;border:1px solid var(--line);background:#241a11;color:var(--ink);font-size:0.9rem;}
+
+.empty-state{text-align:center;padding:60px 20px;}
+.empty-state .glyph{font-size:2.5rem;margin-bottom:12px;}
+.empty-state h3{font-family:var(--font-display);font-size:1.4rem;margin:0 0 8px;}
+.empty-state p{color:var(--ink-soft);max-width:420px;margin:0 auto 20px;}
+
+/* Calendar */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.cal-head h3{font-family:var(--font-display);font-size:1.4rem;margin:0;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;width:100%;}
+.cal-dow{font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;color:var(--ink-soft);text-align:center;padding-bottom:4px;}
+.cal-cell{border:1px solid var(--line-soft);border-radius:8px;min-height:104px;min-width:0;padding:6px 7px;font-size:0.75rem;background:var(--surface-2);display:flex;flex-direction:column;gap:3px;}
+.cal-cell.empty{background:transparent;border-color:transparent;}
+.cal-cell.today{border-color:var(--amber);border-width:2px;}
+.cal-cell.selected{background:rgba(224,162,74,0.15);}
+.cal-cell-top{display:flex;justify-content:space-between;align-items:center;gap:6px;}
+.cal-daynum{font-family:var(--font-mono);font-weight:700;font-size:0.8rem;}
+.cal-chore{color:var(--ink-soft);font-size:0.68rem;line-height:1.3;}
+.cal-icons{display:flex;gap:3px;font-size:0.75rem;flex-shrink:0;}
+.cal-toggle{margin-top:auto;font-size:0.65rem;padding:4px 6px;border-radius:5px;border:1px solid var(--line-soft);background:transparent;color:var(--ink-soft);width:100%;}
+.cal-detail{margin-top:10px;padding-top:12px;border-top:1px solid var(--line-soft);}
+.cal-detail .recipe-block{margin-bottom:14px;}
+.cal-detail .recipe-block:last-of-type{margin-bottom:12px;}
+.cal-toggle.done{background:var(--sage);color:#fff;border-color:var(--sage);}
+.shift-row{display:flex;gap:6px;flex-wrap:wrap;}
+.shift-hour{flex:1;min-width:52px;padding:10px 4px;border-radius:7px;border:1px solid var(--line-soft);background:transparent;color:var(--ink-soft);font-family:var(--font-mono);font-size:0.78rem;font-weight:600;}
+.shift-hour.done{background:var(--sage);color:#fff;border-color:var(--sage);}
+.status-btn{flex:1;min-width:100px;padding:10px 8px;border-radius:7px;border:1px solid var(--line-soft);background:transparent;color:var(--ink-soft);font-family:var(--font-mono);font-size:0.78rem;font-weight:600;}
+.status-btn:hover{border-color:var(--amber);}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:0.8rem;color:var(--ink-soft);}
+
+@media (max-width: 820px){
+  #app{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:sticky;top:0;flex-direction:row;overflow-x:auto;padding:10px 8px;z-index:10;border-right:none;border-bottom:1px solid var(--line-soft);}
+  .brand{display:none;}
+  .nav-item{flex-direction:column;gap:4px;padding:8px 14px;font-size:0.72rem;border-left:none;border-bottom:3px solid transparent;white-space:nowrap;}
+  .nav-item.active{border-left-color:transparent;border-bottom-color:var(--amber);}
+  .sidebar-foot{display:none;}
+  main{padding:24px 18px 60px;}
+  .grid-2{grid-template-columns:1fr;}
+  .page-title{font-size:1.6rem;}
+  .cal-grid{display:flex;flex-direction:column;gap:8px;}
+  .cal-dow{display:none;}
+  .cal-cell.empty{display:none;}
+  .cal-cell{min-height:auto;padding:12px 14px;font-size:0.85rem;border-radius:10px;}
+  .cal-daynum{font-size:0.95rem;}
+  .cal-chore{font-size:0.8rem;}
+  .cal-toggle{width:auto;align-self:flex-start;padding:6px 12px;font-size:0.75rem;margin-top:6px;}
+}
+
+::selection{background:var(--amber);color:#2a1c0e;}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+
+/* ===== RCS-1 SHIP OPS THEME ===== */
+:root{--bg:#0b0d10;--bg-2:#0f1216;--surface:#12161b;--surface-2:#181d23;--ink:#dde5ea;--ink-soft:#8d9ba6;--amber:#e0a24a;--amber-deep:#e0a24a;--sage:#4fd1a5;--rust:#e5533d;--line:#2b333c;--line-soft:rgba(224,162,74,.3);--cyan:#4fc3d9;--font-display:'Share Tech Mono','IBM Plex Mono',monospace;--font-body:'IBM Plex Mono',monospace;--font-mono:'Share Tech Mono','IBM Plex Mono',monospace;}
+body{background:var(--bg);font-size:14px;}
+.page-title,.card h3,.brand{text-transform:uppercase;letter-spacing:.12em;}
+.page-title{color:var(--amber);font-size:1.5rem;}
+.card{border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:0 16px 0 0;background:var(--surface);}
+.eyebrow{color:var(--cyan);}
+.btn,.status-btn,.shift-hour{border-radius:2px;text-transform:uppercase;letter-spacing:.06em;}
+.week-seg{background:#1a2027;}
+.banner{border-radius:2px;}
+.nav-item.active{color:var(--amber);}
+.meter{height:22px;background:#06080a;border:1px solid var(--line);overflow:hidden;}
+.meter-fill{height:100%;transition:width .4s;background-image:repeating-linear-gradient(90deg,transparent 0 12px,rgba(0,0,0,.45) 12px 14px);}
+.lvl-ok{background-color:var(--sage);}.lvl-mid{background-color:var(--amber);}.lvl-low{background-color:var(--rust);}
+.mtext{font-family:var(--font-mono);margin-top:8px;font-size:.95rem;letter-spacing:.05em;}
+.ok{color:var(--sage);}.warn{color:var(--amber);}.crit{color:var(--rust);}
+.next{border:1px dashed var(--amber);padding:10px;margin-top:12px;color:var(--amber);font-family:var(--font-mono);}
+.proto{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);}
+.proto .tx{font-family:var(--font-mono);font-size:.85rem;}
+#shiftClock{font-family:var(--font-mono);font-size:1.3rem;color:var(--cyan);margin:8px 0 12px;}
+.overlay{position:fixed;inset:0;z-index:999;background:rgba(5,6,8,.96);display:flex;align-items:center;justify-content:center;text-align:center;color:var(--amber);font-family:var(--font-mono);font-size:1.25rem;letter-spacing:.12em;padding:24px;animation:ovl 2.2s forwards;pointer-events:none;}
+@keyframes ovl{0%{opacity:0}15%{opacity:1}80%{opacity:1}100%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="app"><div style="padding:60px;font-family:sans-serif;color:#cbb99e;">Initializing RCS-1 systems…</div></div>
+
+<script>
+/* ============================= DATA ============================= */
+
+const PAYDAYS = ["2026-07-23","2026-08-06","2026-08-20","2026-09-03","2026-09-17","2026-10-01","2026-10-15","2026-10-29","2026-11-12","2026-11-26","2026-12-10","2026-12-24"];
+
+const WEEKDAY_CHAIN = [
+  {t:"7:45–8:20 AM", d:"Wake up, refresh Storm's water bowl. Start the air fryer for today's breakfast burrito right away (12-15 min) — shower and get dressed while it cooks, then eat before you head out."},
+  {t:"8:20–8:50 AM", d:"Catch the bus to work."},
+  {t:"8:50–9:30 AM", d:"Pre-work buffer — chill, read, zone out."},
+  {t:"9:30 AM–6:00 PM", d:"Work shift. No lunch burrito on weekdays — lunch is separate, bring/make whatever that ends up being."},
+  {t:"6:00–6:25 PM", d:"Wrap up, walk to the bus stop."},
+  {t:"6:25–6:50 PM", d:"Bus commute home."},
+  {t:"6:50–7:00 PM", d:"Arrive, check mail, inside by 7:00."},
+  {t:"7:00–7:05 PM", d:"Storm Care — unpack bag, feed & water Storm."},
+  {t:"7:05–7:35 PM", d:"30-min daily chore block (see today's chore below)."},
+  {t:"7:35–7:55 PM", d:"20-min weekday workout (cardio & core)."},
+  {t:"7:55–8:15 PM", d:"20-min dinner — air fry your supper burrito (12-15 min) and eat."},
+  {t:"8:15–8:25 PM", d:"Shower & hygiene."},
+  {t:"8:25–11:30 PM", d:"Free time — gaming, movies, reading, chill."},
+  {t:"11:30 PM", d:"Lights out."}
+];
+
+const WEEKEND_SCHEDULE = {
+  Saturday:[
+    {t:"8:00–8:45 AM", d:"Wake window — Storm's water, morning meal, brush teeth. Air fry today's breakfast burrito (12-15 min) and eat. If today's a batch-prep day (every 2 weeks), do the full batch session now instead — see the Burritos tab. It takes about 5½-6 hours start to finish, so plan the whole day around it."},
+    {t:"8:45–10:00 AM", d:"Open time before D&D."},
+    {t:"10:00 AM–4:00 PM", d:"D&D session — take a short break around midday to air fry and eat your lunch burrito."},
+    {t:"4:00–4:05 PM", d:"Feed Storm."},
+    {t:"4:05–4:30 PM", d:"Weekend workout (heavy arms & legs)."},
+    {t:"4:30–5:30 PM", d:"Laundry & household reset."},
+    {t:"5:30–6:15 PM", d:"Dinner & evening hygiene — air fry your supper burrito (12-15 min) and eat."},
+    {t:"6:15 PM–Midnight+", d:"Free time."}
+  ],
+  Sunday:[
+    {t:"8:00–8:45 AM", d:"Wake window — Storm's water, morning meal, brush teeth. Air fry today's breakfast burrito (12-15 min) and eat. If today's a batch-prep day (every 2 weeks), do the full batch session now instead — see the Burritos tab. It takes about 5½-6 hours start to finish, so plan the whole day around it."},
+    {t:"8:45–11:30 AM", d:"Relaxed leisure block."},
+    {t:"11:30–11:55 AM", d:"Weekend workout (heavy arms & legs)."},
+    {t:"11:55 AM–12:15 PM", d:"Shower & hygiene."},
+    {t:"12:15–12:30 PM", d:"Lunch — air fry your lunch burrito (12-15 min) and eat."},
+    {t:"12:30–7:00 PM", d:"Open afternoon block."},
+    {t:"7:00–7:05 PM", d:"Feed Storm."},
+    {t:"7:05–7:45 PM", d:"Dinner & night hygiene — air fry your supper burrito (12-15 min) and eat."},
+    {t:"7:45–9:30 PM", d:"Sunday night chill."},
+    {t:"9:30–10:30 PM", d:"Week prep — lay out Monday clothes, confirm alarm."},
+    {t:"10:30 PM", d:"Bedtime."}
+  ]
+};
+
+// Sunday=0 ... Saturday=6
+const CHORES = [
+  {day:"Sunday", dow:0, task:"No assigned chore — rest day", details:[]},
+  {day:"Monday", dow:1, task:"Floor Sweep & Entryway Clear", details:["Sweep all apartment floors.","Take out trash & recycling down the exterior stairwell.","Break down cardboard, sweep entry hall."]},
+  {day:"Tuesday", dow:2, task:"Hand Dish Wash & Kitchen Reset", details:["Hand wash all accumulated dishes.","Wipe counters, stovetop, sink basin.","Clear expired food from the fridge."]},
+  {day:"Wednesday", dow:3, task:"Tidy Counters, Desks & Dust", details:["Tidy living room, kitchen, desk surfaces.","Dust PC setup, peripherals, keyboard, desk.","Wipe high-touch surfaces."]},
+  {day:"Thursday", dow:4, task:"Bathroom Deep Sweep & Mop", details:["Sweep & mop bathroom floor.","Clean sink, mirror, toilet, shower walls."]},
+  {day:"Friday", dow:5, task:"Litter, Trash & Full Floor Sweep & Mop", details:["Scoop Storm's litter, gather household trash, take down.","Sweep all main floors, mop main living areas & kitchen.","Empty small wastebaskets."]},
+  {day:"Saturday", dow:6, task:"Laundry & Household Reset", details:["Run a laundry load (towels & bed sheets every 2 weeks).","Handled inside the Saturday schedule, 4:30–5:30 PM."]}
+];
+
+const WORKOUTS = {
+  "Weekday Gauntlet — 20 min (cardio, core, light legs/arms)":[
+    {name:"Balcony Jump Rope", meta:"3 minutes", how:"Stand on your balcony with feet close together. Swing the rope using your wrists (not whole arms) and stay light on the balls of your feet, jumping only 1-2 inches off the ground.", purpose:"High-efficiency cardio and lower-leg endurance."},
+    {name:"Dumbbell Goblet Squats", meta:"2 sets × 10 reps", how:"Hold ONE 15 lb dumbbell vertically against your chest like a goblet. Stand feet shoulder-width apart, toes slightly outward. Sit your hips back and down until thighs are parallel to the floor, chest tall. Push through heels to stand.", purpose:"Leg mobility, knee stability, light quad/glute strength."},
+    {name:"Bodyweight Plank", meta:"2 sets × 30-45 sec", how:"Rest on your forearms and toes on the floor. Keep your body in a straight line from head to heels. Squeeze core and glutes tight without letting your lower back sag.", purpose:"Core stability and lower back protection."},
+    {name:"Bicep Curl to Overhead Press", meta:"2 sets × 10 reps", how:"Stand tall holding both 15 lb dumbbells at your sides. Curl them up to your shoulders, then turn palms forward and press straight overhead until arms are fully extended. Lower with control.", purpose:"Light arm, shoulder, and upper back maintenance."},
+    {name:"Balcony Jump Rope Finisher", meta:"2 minutes", how:"Steady-pace jump rope session to finish raising your heart rate.", purpose:"Cardio finisher."}
+  ],
+  "Weekend Gauntlet — 25 min (heavy arms & legs)":[
+    {name:"Balcony Jump Rope Warmup", meta:"3 minutes", how:"Light, rhythmic jumping to get your heart rate up and lubricate your joints.", purpose:"Warmup."},
+    {name:"Dumbbell Romanian Deadlifts", meta:"3 sets × 12 reps", how:"Stand tall holding both 15 lb dumbbells in front of your thighs. Keep knees slightly bent but fixed. Push your hips straight back as you slide the dumbbells down your shins until you feel a deep stretch in your hamstrings. Squeeze glutes hard to return to standing.", purpose:"Hamstring, glute, and lower back strength."},
+    {name:"Alternating Reverse Lunges", meta:"3 sets × 10 reps/leg", how:"Hold both 15 lb dumbbells at your sides. Step one leg backward and drop that knee toward the floor until your front thigh is parallel to the ground. Push through the front heel to stand back up. Alternate legs.", purpose:"Leg balance, unilateral quad/glute strength, hip mobility."},
+    {name:"Dumbbell Floor Press", meta:"3 sets × 12 reps", how:"Lie flat on your back, knees bent, feet flat. Hold both 15 lb dumbbells at chest level, elbows out at a 45-degree angle. Press the weights straight up over your chest until arms are locked, then lower until elbows touch the floor.", purpose:"Chest, shoulder, and tricep strength in tight spaces."},
+    {name:"Dumbbell Bent-Over Rows", meta:"3 sets × 12 reps", how:"Hinge forward at your hips at a 45-degree angle with a flat back, letting weights hang down. Pull the dumbbells up toward your waist, squeezing shoulder blades together at the top. Lower with control.", purpose:"Upper back and grip strength to balance sitting at a computer."},
+    {name:"Dumbbell Hammer Curls", meta:"3 sets × 12 reps", how:"Stand tall with dumbbells at your sides, palms facing each other (neutral grip). Curl weights up toward shoulders keeping palms facing in the whole time.", purpose:"Bicep and forearm grip strength."},
+    {name:"Bicycle Crunches", meta:"2 sets × 20 reps total", how:"Lie on your back, hands behind your head, legs lifted. Bring your right elbow to your left knee while extending the right leg straight out. Switch sides in a pedaling motion.", purpose:"Rotational core and abdominal strength."}
+  ]
+};
+
+/* ---- Meal prep: breakfast burrito daily, supper burrito weekdays, all 3 meals weekend — 4 flavors, batch-made every 2 weeks ---- */
+const BURRITOS = [
+  {
+    name:"Bean, Bacon & Cheese", cal:889,
+    perBurrito:"1½ scoops refried beans, 4 whole cooked bacon slices, 1 heaping scoop shredded cheddar, 1 level scoop cooked diced potato, 1 tortilla",
+    mix:"3 cans refried beans + 36 whole cooked bacon slices + 12 scoops shredded cheddar + 9 scoops cooked diced potato",
+    perBurritoG:"180g refried beans, 35g bacon, 70g cheddar, 70g potato, 1 tortilla",
+    mixG:"1620g refried beans + 315g cooked bacon + 630g shredded cheddar + 630g cooked potato"
+  },
+  {
+    name:"Sausage, Potato & Cheese", cal:960,
+    perBurrito:"9 cooked sausage links, 1 heaping scoop cooked diced potato, 1 level scoop shredded cheddar, 1 tortilla",
+    mix:"81 cooked sausage links + 12 scoops cooked diced potato + 9 scoops shredded cheddar",
+    perBurritoG:"135g sausage, 100g potato, 50g cheddar, 1 tortilla",
+    mixG:"1215g cooked sausage + 900g cooked potato + 450g shredded cheddar"
+  },
+  {
+    name:"Sausage, Bean & Cheese", cal:792,
+    perBurrito:"4 cooked sausage links, 1 level scoop refried beans, 1 heaping scoop shredded cheddar, 1 tortilla",
+    mix:"36 cooked sausage links + 2 cans refried beans + 11 scoops shredded cheddar",
+    perBurritoG:"65g sausage, 125g refried beans, 60g cheddar, 1 tortilla",
+    mixG:"585g cooked sausage + 1125g refried beans + 540g shredded cheddar"
+  },
+  {
+    name:"Loaded Potato & Bacon", cal:900,
+    perBurrito:"2 level scoops cooked diced potato (the butter is already stirred into the potato), 5 whole cooked bacon slices, 1 heaping scoop shredded cheddar, 1 tortilla",
+    mix:"18 scoops cooked diced potato + 45 whole cooked bacon slices + 11 scoops shredded cheddar + 1 level scoop melted butter (stir the melted butter into the cooked potato first)",
+    perBurritoG:"150g potato, 45g bacon, 60g cheddar, 14g butter, 1 tortilla",
+    mixG:"1350g cooked potato + 405g cooked bacon + 540g shredded cheddar + 126g melted butter"
+  }
+];
+
+const BURRITO_GROCERY = [
+  ["Old cheddar cheese (2.27 kg club-size blocks)","2 blocks",58.00],
+  ["Large tortillas","8 packs of 10",30.32],
+  ["Bacon (500 g packs, about 20 slices each)","8 packs (about 120-160 slices, you need 162)",48.00],
+  ["Potatoes (10lb bags)","2 bags",15.98],
+  ["Refried beans (546 mL cans)","10 cans (5 pinto + 5 black)",40.00],
+  ["Breakfast sausage links","5 kg (about 230 links at 46 per kg, you need 234)",71.65],
+  ["Butter (454 g block)","1 block",6.00],
+];
+const CYCLE_DAYS = 30;                // ~1 calendar month — real months run 28-31 days, grocery list below is sized for the worst-case month (72 burritos) so a shorter month just banks a few spares, never runs short
+const BATCH_EVERY_DAYS = 14;         // one prep session every 2 weeks
+const BATCHES_PER_CYCLE = 2;         // 2 batches per month
+const BURRITOS_PER_FLAVOR_PER_BATCH = 9;  // 9 of each of the 4 flavors = 36 burritos per batch
+const TOTAL_BURRITOS_PER_CYCLE = BATCHES_PER_CYCLE * BURRITOS_PER_FLAVOR_PER_BATCH * BURRITOS.length; // 72
+
+const MECHANICS = {
+  batchPrep:[
+    "Air fry the bacon — 81 whole slices this session (36 for the Bean, Bacon & Cheese burritos + 45 for the Loaded Potato & Bacon burritos). That is about 4½ of the 500 g packs (a pack has roughly 20 slices, so count the slices in yours). Lay the slices in a single layer, overlapping only slightly, in batches at 400°F for 8-10 min per batch, turning once halfway, until crispy. Keep them whole. Let them cool on a plate, then move them into a covered container in the fridge.",
+    "Air fry the sausage — 117 whole breakfast sausage links this session (81 for the Sausage, Potato & Cheese burritos + 36 for the Sausage, Bean & Cheese burritos), in batches at 400°F for 10-12 min per batch, turning the links over halfway, until fully cooked through. Keep the links whole, do not chop them. Let them cool on a plate, then move them into a covered container in the fridge.",
+    "Air fry the potato — about 8lb raw (most of one 10lb bag, the rest is spare) this session, diced small, in batches at 400°F for 12-15 min per batch, shaking halfway, until golden and cooked through. Spread each round out on a tray to cool, then move it into a covered container in the fridge.",
+    "Shred the cheddar from the block — 43 scoops total this session (about 2.1 kg, almost one whole 2.27 kg block). This takes about 40 min, so do it while the air fryer is running a round. Do not press the cheese down in the scoop, and keep it in a bowl in the fridge until you assemble the burritos.",
+    "Make the butter potato for the Loaded Potato & Bacon burritos only: melt 1 level scoop of butter in the microwave (about 30-45 seconds), then stir it into the 18 scoops of cooked potato you are setting aside for that flavor. The other flavors use plain potato.",
+    "Cool everything completely before you assemble. The bacon, sausage links and potato must be cold, not warm, or the burritos will sweat inside the wrap and grow ice crystals in the freezer. Cooked food should not sit out for more than 2 hours in total, which is why each round goes into the fridge as soon as it has cooled.",
+    "Assemble each burrito one at a time on a clean counter, using the \"Per burrito\" amounts for that flavor. Leave about 2 inches clear at the left and right edges of the tortilla, and tear bacon slices in half if they are longer than the tortilla. Layer in this order:<br>• <b>Bean, Bacon & Cheese:</b> smear the beans over the tortilla, spread the potato, lay the bacon slices on top, then add the cheese last.<br>• <b>Sausage, Potato & Cheese:</b> spread the potato, lay the sausage links side by side on top, then add the cheese last.<br>• <b>Sausage, Bean & Cheese:</b> smear the beans over the tortilla, lay the sausage links on top, then add the cheese last.<br>• <b>Loaded Potato & Bacon:</b> spread the butter potato, lay the bacon slices on top, then add the cheese last.<br>Then fold the left and right edges in and roll up tightly from the bottom.",
+    "Wrap each rolled burrito tightly in Saran wrap, label it with the flavor name and today's date, and freeze flat.",
+  ],
+  dailyReheat:[
+    "Unwrap one frozen burrito (take off all the Saran wrap).",
+    "Air fry at 350°F for 12-15 min, flipping once halfway, until heated through and a little crispy outside.",
+    "That's it — no thawing needed, no other prep."
+  ],
+  schedule:{
+    weekday:"2 burritos: 1 for breakfast, 1 for supper. No lunch burrito — bring/make lunch separately.",
+    weekend:"3 burritos: 1 each for breakfast, lunch, and supper.",
+  }
+};
+
+/* ============================= STORAGE (with standalone fallback) ============================= */
+// If this file is opened directly in a phone/desktop browser (not inside Claude),
+// window.storage won't exist — fall back to the browser's own localStorage instead.
+// That means: download this file, open it in your phone's browser, add to home screen,
+// and it saves permanently on that phone, no Claude account or paid plan required.
+const storage = (function(){
+  if (window.storage) return window.storage;
+  return {
+    async get(key){
+      const raw = localStorage.getItem('hearth_'+key);
+      if(raw===null) throw new Error('not found');
+      return {key, value: raw};
+    },
+    async set(key, value){
+      localStorage.setItem('hearth_'+key, value);
+      return {key, value};
+    }
+  };
+})();
+const usingLocalFallback = !window.storage;
+// Everything lives in ONE object, saved as ONE storage key — fewer calls, more reliable.
+let state = { active:null, choreLog:{}, activityLog:{}, shiftLog:{}, tab:"today" };
+let selectedCalDate = null;
+let openPlanId = null;
+let calMonthOffset = 0; // months from current month, for calendar navigation
+let saveError = null;
+let scrollToTodayFlag = false; // set true when jumping to Calendar tab so we auto-scroll to today's cell
+
+// Local-calendar-day date string (YYYY-MM-DD) — deliberately NOT toISOString(),
+// which converts to UTC and can silently roll the date over an hour or more
+// early/late depending on timezone, right around midnight.
+function toLocalISO(d){
+  const year = d.getFullYear();
+  const month = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${year}-${month}-${day}`;
+}
+function todayISO(){ return toLocalISO(new Date()); }
+function fmtDate(iso){ const d=new Date(iso+"T00:00:00"); return d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'}); }
+function dayName(dow){ return ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][dow]; }
+async function loadState(){
+  try{
+    const r = await storage.get('hearth-state', false);
+    if(r && r.value){
+      const parsed = JSON.parse(r.value);
+      state.active = parsed.active || null;
+      state.choreLog = parsed.choreLog || {};
+      state.activityLog = parsed.activityLog || {};
+      state.shiftLog = parsed.shiftLog || {};
+    }
+  }catch(e){ /* no saved state yet, defaults stand */ }
+}
+
+async function persist(){
+  const payload = { active: state.active, choreLog: state.choreLog, activityLog: state.activityLog, shiftLog: state.shiftLog };
+  try{
+    const result = await storage.set('hearth-state', JSON.stringify(payload), false);
+    if(!result){ saveError = "Save didn't go through — your change is kept on this screen, but try again so it sticks."; }
+    else{ saveError = null; }
+  }catch(e){
+    saveError = "Save failed (connection hiccup) — your change is kept on this screen for now. Tap Retry save.";
+  }
+  return !saveError;
+}
+
+// Returns the 4 batch-prep dates, always Saturdays (so the 5½-6 hour session fits the weekend
+// schedule instead of landing on a random workday), every 2 weeks from the first Saturday on/after
+// the start date — if you start on a Saturday, that day itself is the first batch day.
+function getBatchDates(startDateStr){
+  const start = new Date(startDateStr+"T00:00:00");
+  const daysUntilSaturday = (6 - start.getDay() + 7) % 7;
+  const firstSaturday = new Date(start);
+  firstSaturday.setDate(start.getDate() + daysUntilSaturday);
+  const dates = [];
+  for(let i=0;i<BATCHES_PER_CYCLE;i++){
+    const d = new Date(firstSaturday);
+    d.setDate(firstSaturday.getDate() + i*BATCH_EVERY_DAYS);
+    dates.push(d);
+  }
+  return dates;
+}
+
+function cycleInfo(){
+  if(!state.active) return null;
+  const start = new Date(state.active.startDate+"T00:00:00");
+  const today = new Date(); today.setHours(0,0,0,0);
+  const batchDates = getBatchDates(state.active.startDate);
+  const cycleEnd = new Date(start); cycleEnd.setDate(cycleEnd.getDate() + CYCLE_DAYS);
+  const dayNum = Math.floor((today-start)/86400000)+1;
+  const totalDays = Math.round((cycleEnd-start)/86400000);
+  const daysLeft = Math.round((cycleEnd-today)/86400000);
+  const weekNum = Math.max(1, Math.ceil(dayNum/7));
+  const totalWeeks = Math.ceil(CYCLE_DAYS/7); // rough visual progress only — the real boundary is CYCLE_DAYS
+  // Which batch index (0-1) is the most recent one on/before today? -1 = before the very first batch day.
+  let batchIndex = -1;
+  for(let i=0;i<batchDates.length;i++){ if(today >= batchDates[i]) batchIndex = i; else break; }
+  const isBatchDay = batchDates.some(d => toLocalISO(d)===toLocalISO(today));
+  const nextBatchDate = batchDates.find(d => d > today) || null;
+  return {dayNum, totalDays, daysLeft, weekNum, totalWeeks, batchIndex, isBatchDay, batchDates, nextBatchDate};
+}
+
+function nextPayday(){
+  const t = todayISO();
+  return PAYDAYS.find(p=>p>=t) || null;
+}
+
+/* ============================= RENDER ============================= */
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <nav class="sidebar">
+      <div class="brand">RCS-1 <span>OPS</span></div>
+      ${navItem('today','◈','Bridge')}
+      ${navItem('calendar','◷','Log')}
+      ${navItem('plans','▣','Galley')}
+      ${navItem('routine','☰','Decks')}
+      ${navItem('paydays','¤','Credits')}
+      ${navItem('stats','∿','Stats')}
+      ${navItem('guide','?','Manual')}
+      <div class="sidebar-foot" id="sidebarFoot">Vessel RCS-1 · Crew: JT + Storm · build 3</div>
+    </nav>
+    <main id="main"></main>
+  `;
+  renderTab();
+  document.querySelectorAll('.nav-item[data-tab]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const goingToCalendar = el.dataset.tab === 'calendar';
+      state.tab = el.dataset.tab;
+      if(goingToCalendar){
+        calMonthOffset = 0; // jump back to the current month
+        selectedCalDate = null; // don't leave an old day expanded
+        scrollToTodayFlag = true; // trigger the auto-scroll once rendered
+      }
+      render();
+    });
+  });
+  const foot = document.getElementById('sidebarFoot');
+  if(foot){
+    foot.textContent = usingLocalFallback
+      ? "✓ Saving to this phone/browser — permanent, no login needed."
+      : "Saved to your Claude account.";
+  }
+}
+
+function navItem(tab, icon, label){
+  return `<button class="nav-item ${state.tab===tab?'active':''}" data-tab="${tab}"><span class="nav-icon">${icon}</span>${label}</button>`;
+}
+
+function errorBanner(){
+  if(!saveError) return '';
+  return `<div class="banner error"><span>⚠️</span><div><b>Save issue</b>${saveError}</div>
+  <button class="btn small" id="retrySaveBtn" style="margin-left:auto;">Retry save</button></div>`;
+}
+
+function renderTab(){
+  const main = document.getElementById('main');
+  if(state.tab==='today') main.innerHTML = errorBanner() + renderToday();
+  else if(state.tab==='calendar') main.innerHTML = errorBanner() + renderCalendar();
+  else if(state.tab==='plans') main.innerHTML = errorBanner() + renderPlans();
+  else if(state.tab==='routine') main.innerHTML = errorBanner() + renderRoutine();
+  else if(state.tab==='paydays') main.innerHTML = errorBanner() + renderPaydays();
+  else if(state.tab==='stats') main.innerHTML = errorBanner() + renderStats();
+  else if(state.tab==='guide') main.innerHTML = errorBanner() + renderGuide();
+  wireTabEvents();
+  if(state.tab==='calendar' && scrollToTodayFlag){
+    scrollToTodayFlag = false;
+    // Wait a tick so the DOM has actually painted before scrolling.
+    requestAnimationFrame(()=>{
+      const todayCell = document.querySelector('.cal-cell.today');
+      if(todayCell && typeof todayCell.scrollIntoView === 'function'){
+        todayCell.scrollIntoView({behavior:'smooth', block:'center'});
+      }
+    });
+  }
+}
+
+/* ---- TODAY ---- */
+function getShiftDay(dateKey){
+  const d = state.shiftLog[dateKey];
+  if(d && typeof d === 'object' && !Array.isArray(d)) return { hours:[false,false,false,false,false,false,false,false], break1:false, break2:false, lunch:false, deskTidy:false, status:null, ...d };
+  // migrate old array-only format if it exists
+  return { hours: Array.isArray(d) ? d : [false,false,false,false,false,false,false,false], break1:false, break2:false, lunch:false, deskTidy:false, status:null };
+}
+
+function computeStreak(){
+  let streak = 0;
+  let d = new Date();
+  for(let i=0; i<60; i++){
+    const dow = d.getDay();
+    if(dow===0 || dow===6){ d.setDate(d.getDate()-1); continue; } // weekends never count, never break the streak
+    const key = toLocalISO(d);
+    const day = getShiftDay(key);
+    const isToday = (i===0); // first iteration is always today, by construction — no string-matching needed
+    if(isToday && !day.status){ d.setDate(d.getDate()-1); continue; } // today, nothing pressed yet — doesn't count and doesn't break anything
+    if(day.status==='finished'){ streak++; d.setDate(d.getDate()-1); } // counts once you press Finished
+    else if(day.status==='excused'){ d.setDate(d.getDate()-1); } // preserves the streak, doesn't add to it
+    else{ break; } // Missed, or a past day you never submitted — streak stops here
+  }
+  return streak;
+}
+
+function renderStreakDisplay(streak, todayStatus){
+  // Font size grows with the streak so it visibly gets bigger the longer you go without missing a day.
+  // Starts around 2rem, grows steadily, caps out at 4rem so it never breaks the layout.
+  const size = Math.min(2 + streak*0.12, 4).toFixed(2);
+  const glow = streak>=10 ? 'text-shadow:0 0 18px rgba(224,162,74,0.55);' : (streak>=5 ? 'text-shadow:0 0 10px rgba(224,162,74,0.35);' : '');
+  // Disambiguate: does this number include today, or is it carried over from your last completed workday?
+  let subtitle = `day${streak===1?'':'s'} in a row`;
+  if(todayStatus === 'finished'){
+    subtitle += ' · includes today';
+  } else if(!todayStatus){
+    subtitle += streak>0 ? ' · today not counted yet' : '';
+  }
+  return `<div style="text-align:center;padding:10px 0 4px;">
+    <div style="font-family:var(--font-display);font-weight:700;font-size:${size}rem;line-height:1;color:var(--amber);${glow}">🔥 ${streak}</div>
+    <div style="font-size:0.78rem;color:var(--ink-soft);margin-top:4px;">${subtitle}</div>
+  </div>`;
+}
+
+function renderShiftTracker(){
+  const now = new Date();
+  const dow = now.getDay();
+  const isWeekday = dow>=1 && dow<=5;
+  const dateKey = todayISO();
+  const day = getShiftDay(dateKey);
+  const labels = ["10am","11am","12pm","1pm","2pm","3pm","4pm","5pm"];
+  const doneCount = day.hours.filter(Boolean).length;
+  const streak = computeStreak();
+  const streakDisplay = renderStreakDisplay(streak, day.status);
+
+  if(!isWeekday){
+    return `<div class="card">
+      <div class="eyebrow">Shift operations</div>
+      ${streakDisplay}
+      <p style="font-size:0.9rem;color:var(--ink-soft);margin:8px 0 0;">Not a work day — this runs Monday-Friday, 10am-6pm.</p>
+    </div>`;
+  }
+
+  let statusBlock = '';
+  if(day.status){
+    const labelMap = { finished:'[ SHIFT COMPLETE — STREAK ONLINE ]', missed:'[ WARNING: SHIFT MISSED — STREAK OFFLINE ]', excused:'[ EXCUSED — STREAK HELD ]' };
+    statusBlock = `<div class="banner done"><span>${day.status==='finished'?'✅':(day.status==='missed'?'❌':'📋')}</span><div>${labelMap[day.status]}<button class="btn ghost small" data-status="" style="margin-top:8px;">Undo, change status</button></div></div>`;
+  } else {
+    statusBlock = `<p style="font-size:0.8rem;color:var(--ink-soft);margin:14px 0 6px;">End your day — pick one</p>
+    <div class="shift-row">
+      <button class="status-btn" data-status="finished">✅ Shift complete</button>
+      <button class="status-btn" data-status="missed">❌ Shift missed</button>
+      <button class="status-btn" data-status="excused">📋 Excused</button>
+    </div>`;
+  }
+
+  return `<div class="card">
+    <div class="eyebrow">Shift operations</div>
+    ${streakDisplay}
+    ${shiftClockBlock(day)}
+    <p style="font-size:0.85rem;color:var(--ink-soft);margin:10px 0 12px;">Just for showing up and staying consistent — not tracking work itself.</p>
+
+    <p style="font-size:0.8rem;color:var(--ink-soft);margin:0 0 6px;">Hourly check-in · ${doneCount}/8</p>
+    <div class="shift-row">
+      ${labels.map((l,i)=>`<button class="shift-hour ${day.hours[i]?'done':''}" data-hour="${i}">${l}</button>`).join('')}
+    </div>
+
+    <p style="font-size:0.8rem;color:var(--ink-soft);margin:14px 0 6px;">Breaks & lunch</p>
+    <div class="shift-row">
+      <button class="shift-hour ${day.break1?'done':''}" data-break="break1">Break 1</button>
+      <button class="shift-hour ${day.lunch?'done':''}" data-break="lunch">Lunch</button>
+      <button class="shift-hour ${day.break2?'done':''}" data-break="break2">Break 2</button>
+    </div>
+    ${(day.break1||day.break2||day.lunch) ? `<p style="font-size:0.82rem;color:var(--amber-deep);margin:8px 0 0;">💧 Good time to grab some water while you're up.</p>` : ''}
+
+    <p style="font-size:0.8rem;color:var(--ink-soft);margin:14px 0 6px;">End of shift</p>
+    <button class="shift-hour ${day.deskTidy?'done':''}" data-break="deskTidy" style="width:100%;">🧹 Tidy the desk before you head out</button>
+
+    ${statusBlock}
+  </div>`;
+}
+
+
+/* ============================= SHIP OPS LAYER ============================= */
+function ensureDay(k){ if(!state.shiftLog[k]) state.shiftLog[k]={hours:[false,false,false,false,false,false,false,false],break1:false,break2:false,lunch:false,deskTidy:false,status:null}; return state.shiftLog[k]; }
+function isWeekdayNow(){ const d=new Date().getDay(); return d>=1&&d<=5; }
+function eveningUnlocked(){ const d=state.shiftLog[todayISO()]||{}; return !isWeekdayNow()||!!d.status||!!d.clockOut||!!d.override||new Date().getHours()>=18; }
+function fmtHMS(ms){ const t=Math.max(0,Math.floor(ms/1000)); const p=n=>String(n).padStart(2,'0'); return p(Math.floor(t/3600))+':'+p(Math.floor((t%3600)/60))+':'+p(t%60); }
+function tickShift(){ const el=document.getElementById('shiftClock'); if(!el) return; const rem=(+el.dataset.start)+8*3600000-Date.now(); el.textContent = rem>0 ? 'T-MINUS '+fmtHMS(rem)+' REMAINING' : 'SHIFT WINDOW COMPLETE — STAND DOWN WHEN READY'; }
+setInterval(tickShift,1000);
+function shiftClockBlock(day){
+  if(day.status) return '';
+  setTimeout(tickShift,0);
+  if(!day.clockIn) return `<button class="btn" data-clockin="1" style="width:100%;margin:6px 0 12px;">ALL HANDS — CLOCK IN</button>`;
+  return `<div style="margin:6px 0 12px;"><div class="eyebrow">[ ALL HANDS — SHIFT ACTIVE ]</div><div id="shiftClock" data-start="${day.clockIn}">--:--:--</div><button class="btn" data-standdown="1" style="width:100%;">SHIFT COMPLETE — STAND DOWN</button></div>`;
+}
+function showStandDown(){ const o=document.createElement('div'); o.className='overlay'; o.innerHTML='[ STAND DOWN ]<br><br>BATTLE STATIONS UNLOCKED<br>DECK MAINTENANCE MODE ONLINE'; document.body.appendChild(o); setTimeout(()=>o.remove(),2300); }
+function renderBridge(){
+  const iso=todayISO(), dow=new Date().getDay(), wk=isWeekdayNow();
+  const act=state.activityLog[iso]||{}, day=state.shiftLog[iso]||{};
+  const unlocked=eveningUnlocked();
+  const items=[{k:'meal',d:!!act.meal},{k:'chore',d:!!act.chore},{k:'workout',d:!!act.workout}];
+  if(wk) items.push({k:'tidy',d:!!day.deskTidy});
+  const done=items.filter(i=>i.d).length, pct=Math.round(done/items.length*100);
+  const lvl=pct>=100?'ok':(pct>=50?'mid':'low');
+  const msg=pct>=100?`<span class="ok">[ ALL SYSTEMS NOMINAL — KEEP HER FLYIN' ]</span>`:(pct>=50?`<span class="warn">[ HULL INTEGRITY ${pct}% — SYSTEMS DEGRADED ]</span>`:`<span class="crit">[ WARNING: HULL INTEGRITY ${pct}% — CRITICAL ]</span>`);
+  let next='';
+  if(wk&&!day.status&&!day.clockIn) next='ALL HANDS — CLOCK IN';
+  else if(wk&&day.clockIn&&!day.status) next='SHIFT ACTIVE — STAND DOWN WHEN DONE';
+  else if(!act.meal) next='GALLEY RATIONS';
+  else if(unlocked&&!act.chore) next='DECK PROTOCOL';
+  else if(unlocked&&!act.workout) next='GRAV-FIT DRILL';
+  else if(wk&&!day.deskTidy&&day.clockIn) next='SECURE WORKSTATION';
+  else if(!unlocked) next='STANDBY — COMPLETE SHIFT TO UNLOCK EVENING PROTOCOLS';
+  let fin=0,mis=0,exc=0; Object.values(state.shiftLog).forEach(v=>{ if(v.status==='finished')fin++; else if(v.status==='missed')mis++; else if(v.status==='excused')exc++; });
+  const chore=(typeof CHORES!=='undefined'&&CHORES.find(c=>c.dow===dow))||null;
+  const row=(key,label,doneTxt,warnTxt,locked,sub)=>{
+    const d=!!act[key];
+    return `<div class="proto"><div><div class="eyebrow" style="margin:0 0 2px;">${label}</div><div class="tx ${d?'ok':'warn'}">${d?doneTxt:(locked?'[ STANDBY — LOCKED ]':warnTxt)}</div>${sub?`<div style="font-size:.78rem;color:var(--ink-soft);margin-top:2px;">${sub}</div>`:''}</div>${locked&&!d?`<button class="btn small ghost" data-override="1">OVERRIDE</button>`:`<button class="btn small ${d?'ghost':''}" data-activity="${key}" data-date="${iso}">${d?'UNDO':'LOG IT'}</button>`}</div>`;
+  };
+  return `<div class="card">
+    <div class="eyebrow">Hull &amp; life support integrity</div>
+    <div class="meter"><div class="meter-fill lvl-${lvl}" style="width:${pct}%"></div></div>
+    <div class="mtext">${msg}</div>
+    ${next?`<div class="next">[ NEXT: ${next} ]</div>`:''}
+    <div style="margin-top:12px;">
+      ${row('meal','Galley rations','[ RATIONS NOMINAL ]','[ WARNING: RATIONS PENDING ]',false,'')}
+      ${row('chore','Deck protocols','[ DECK SECURED ]','[ WARNING: DECK COMPROMISED ]',!unlocked,chore?chore.task:'')}
+      ${row('workout','Crew readiness','[ DRILL COMPLETE ]','[ WARNING: CREW READINESS LOW ]',!unlocked,'')}
+    </div>
+    <div class="mtext" style="font-size:.8rem;color:var(--ink-soft);">SHIFTS: <span class="ok">${fin} COMPLETE</span> · <span class="crit">${mis} MISSED</span> · ${exc} EXCUSED</div>
+  </div>`;
+}
+
+function renderToday(){
+  if(!state.active){
+    return `
+      <h1 class="page-title">Bridge Telemetry</h1>
+      <p class="page-sub">${fmtDate(todayISO())}</p>
+      ${renderBridge()}${renderShiftTracker()}
+      <div class="empty-state card">
+        <div class="glyph">🌯</div>
+        <h3>Not started yet</h3>
+        <p>Start your monthly burrito cycle to begin tracking batch days and your freezer stock.</p>
+        <button class="btn" data-goto="plans">Start the cycle</button>
+      </div>
+    `;
+  }
+  const ci = cycleInfo();
+  const np = nextPayday();
+  const dow = new Date().getDay(); // 0=Sun..6=Sat
+  const isWeekend = dow===0 || dow===6;
+  const daysUntilNextBatch = ci.nextBatchDate ? Math.round((ci.nextBatchDate - new Date(new Date().setHours(0,0,0,0)))/86400000) : null;
+
+  let ribbon = '';
+  for(let w=1; w<=ci.totalWeeks; w++){
+    let cls = w<ci.weekNum ? 'past' : (w===ci.weekNum ? 'current' : '');
+    ribbon += `<div class="week-seg ${cls}">W${w}</div>`;
+  }
+
+  let phaseBlock = '';
+  if(ci.daysLeft <= 0){
+    phaseBlock = `<div class="banner alert"><span>🕯️</span><div><b>This cycle has run its course</b>Time to restock — a fresh month, same 4 flavors or swap things up.</div></div>
+    <button class="btn" data-goto="plans">Start next cycle</button>`;
+  } else if(ci.batchIndex === -1){
+    phaseBlock = `<div class="banner info"><span>📅</span><div><b>No stock yet — your first batch day is ${fmtDate(toLocalISO(ci.batchDates[0]))}</b>Nothing to do until then — the freezer's just empty for a few days.</div></div>`;
+  } else if(ci.isBatchDay){
+    phaseBlock = `<div class="banner info"><span>🌯</span><div><b>Batch day</b>Make all 4 flavors today — 9 of each, 36 burritos total, enough for the next 2 weeks. See the Burritos tab for the full ingredient list and steps.</div></div>
+    <div class="card">
+      <h3>Batch prep steps</h3>
+      <ol class="steps">${MECHANICS.batchPrep.map(s=>`<li>${s}</li>`).join('')}</ol>
+    </div>`;
+  } else {
+    if(ci.daysLeft<=7){
+      phaseBlock += `<div class="banner alert"><span>⏳</span><div><b>${ci.daysLeft} days left in this cycle</b>Good time to plan your next grocery order.${np?` Your next payday is <b>${fmtDate(np)}</b> — a natural day to place the order.`:''}</div>
+      <button class="btn small" data-goto="plans" style="margin-left:auto;align-self:center;">See grocery list</button></div>`;
+    }
+    if(daysUntilNextBatch !== null && daysUntilNextBatch<=1){
+      phaseBlock += `<div class="banner alert"><span>❄️</span><div><b>Batch day is tomorrow</b>Worth checking what's left in the freezer before you're down to nothing.</div></div>`;
+    }
+  }
+
+  const todayMeals = isWeekend
+    ? `<p style="margin:0;font-size:0.9rem;">🌯 Breakfast, 🌯 Lunch, 🌯 Supper — <b>3 burritos today</b>, any flavors you like.</p>`
+    : `<p style="margin:0;font-size:0.9rem;">🌯 Breakfast, 🌯 Supper — <b>2 burritos today</b>, no lunch burrito (bring/make lunch separately).</p>`;
+
+  return `
+    <h1 class="page-title">Bridge Telemetry</h1>
+    <p class="page-sub">${fmtDate(todayISO())} · <span class="tag">Day ${Math.max(ci.dayNum,0)} of ${ci.totalDays}</span></p>
+    ${renderBridge()}${renderShiftTracker()}
+    <div class="week-ribbon">${ribbon}</div>
+    <div class="card">
+      <div class="eyebrow">Today's meals</div>
+      ${todayMeals}
+    </div>
+    ${phaseBlock}
+    <div class="card">
+      <div class="eyebrow">Reheat (any burrito, any meal)</div>
+      <ol class="steps">${MECHANICS.dailyReheat.map(s=>`<li>${s}</li>`).join('')}</ol>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Reminder</div>
+      <p style="margin:0;font-size:0.9rem;">Crew check: feed and water Storm first thing when you get home, before anything else.</p>
+    </div>
+  `;
+}
+
+/* ---- STATS ---- */
+function renderStats(){
+  const allDays = Object.keys(state.shiftLog);
+
+  // Walk every weekday from the first day you ever logged anything through yesterday.
+  // A weekday with no entry at all counts the same as an explicit "Missed" tap —
+  // skipping the app doesn't skip the tally. Today is handled separately below since
+  // it may still be in progress and shouldn't be counted as missed just because it's not done yet.
+  let finished = 0, missed = 0, excused = 0;
+  let longest = 0, running = 0;
+  if(allDays.length){
+    const earliest = allDays.slice().sort()[0];
+    let d = new Date(earliest+"T00:00:00");
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate()-1);
+    yesterday.setHours(0,0,0,0);
+    while(d <= yesterday){
+      const dow = d.getDay();
+      if(dow===0 || dow===6){ d.setDate(d.getDate()+1); continue; } // weekends never count
+      const key = toLocalISO(d);
+      const day = getShiftDay(key);
+      if(day.status==='finished'){ finished++; running++; longest = Math.max(longest, running); }
+      else if(day.status==='excused'){ excused++; /* preserves the run, doesn't add to it */ }
+      else{ missed++; running = 0; } // explicit "missed" OR never logged at all — both count as missed
+      d.setDate(d.getDate()+1);
+    }
+    const today = getShiftDay(todayISO());
+    const todow = new Date().getDay();
+    if(todow>=1 && todow<=5){
+      if(today.status==='finished'){ finished++; running++; longest = Math.max(longest, running); }
+      else if(today.status==='excused'){ excused++; }
+      else if(today.status==='missed'){ missed++; running = 0; }
+      // no status yet today: not counted either way — still in progress, matches the streak logic on Today
+    }
+  }
+  const totalSubmitted = finished + missed + excused;
+  const goodPct = totalSubmitted>0 ? Math.round((finished/totalSubmitted)*100) : 0;
+  const currentStreak = computeStreak();
+  const todayIsFinished = getShiftDay(todayISO()).status === 'finished';
+
+  const choreCount = Object.values(state.choreLog).filter(v=>v).length;
+  const activityDays = Object.keys(state.activityLog).length;
+
+  return `
+    <h1 class="page-title">Ship Stats</h1>
+    <p class="page-sub">Simple, honest numbers — no pressure, just what actually happened.</p>
+
+    <div class="grid-2">
+      <div class="card" style="text-align:center;">
+        <div class="eyebrow">Current streak</div>
+        <div style="font-family:var(--font-display);font-weight:700;font-size:2.6rem;color:var(--amber);">🔥 ${currentStreak}</div>
+        <p style="font-size:0.85rem;color:var(--ink-soft);margin:4px 0 0;">day${currentStreak===1?'':'s'} in a row${(!todayIsFinished && currentStreak>0) ? ' · today not counted yet' : (todayIsFinished ? ' · includes today' : '')}</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="eyebrow">Longest streak ever</div>
+        <div style="font-family:var(--font-display);font-weight:700;font-size:2.6rem;color:var(--amber);">🏆 ${longest}</div>
+        <p style="font-size:0.85rem;color:var(--ink-soft);margin:4px 0 0;">day${longest===1?'':'s'}, your best run so far</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Days done good vs. days done bad</h3>
+      <table class="grocery">
+        <tr><th>Status</th><th>Count</th></tr>
+        <tr><td>✅ Finished</td><td>${finished}</td></tr>
+        <tr><td>📋 Excused</td><td>${excused}</td></tr>
+        <tr><td>❌ Missed</td><td>${missed}</td></tr>
+        <tr><td>Finish rate</td><td>${goodPct}%</td></tr>
+      </table>
+      <p style="font-size:0.85rem;color:var(--ink-soft);margin-top:10px;">${totalSubmitted===0?"No shifts logged yet — mark your first one on the Today tab.":"Based on "+totalSubmitted+" work day"+(totalSubmitted===1?'':'s')+" since you started tracking — a day you never logged counts as missed, same as tapping Missed."}</p>
+    </div>
+
+    <div class="card">
+      <h3>Everything else, all-time</h3>
+      <ul class="plain">
+        <li><b>${choreCount}</b> chores marked done from the Calendar</li>
+        <li><b>${activityDays}</b> day${activityDays===1?'':'s'} with a chore/workout/meal logged from the Calendar day view</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Backup & restore</h3>
+      <p style="font-size:0.9rem;color:var(--ink-soft);">If you're opening this app as a downloaded file (not through Claude directly), your data lives in this phone's browser storage — which isn't always permanent. Copy a backup here now and then, and paste it back in if anything ever gets cleared.</p>
+      <div class="field-row" style="margin-bottom:6px;">
+        <button class="btn ghost small" id="exportBackupBtn">Show backup text</button>
+      </div>
+      <div id="backupOutputWrap" style="display:none;">
+        <textarea id="backupOutput" readonly style="width:100%;min-height:90px;background:#1a1209;color:var(--ink-soft);border:1px solid var(--line);border-radius:6px;padding:10px;font-family:var(--font-mono);font-size:0.72rem;"></textarea>
+        <p style="font-size:0.8rem;color:var(--ink-soft);margin:6px 0 0;">Tap the box, select all, copy — then paste it somewhere safe (like a Notes app).</p>
+      </div>
+      <div class="field-row" style="margin-top:14px;">
+        <div class="field" style="flex:1;min-width:100%;">
+          <label>Paste a backup to restore</label>
+          <textarea id="backupInput" placeholder="Paste your saved backup text here" style="width:100%;min-height:70px;background:#241a11;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px;font-family:var(--font-mono);font-size:0.72rem;"></textarea>
+        </div>
+      </div>
+      <button class="btn small" id="restoreBackupBtn" style="margin-top:8px;">Restore from pasted backup</button>
+    </div>
+
+    <div class="card">
+      <h3>Reset workday tracker</h3>
+      <p style="font-size:0.9rem;color:var(--ink-soft);">Clears every Finished/Missed/Excused entry and hourly check-in ever logged — the streak (current and longest) goes back to 0. Nothing else (plans, chores, paydays) is touched.</p>
+      <button class="btn ghost small" id="resetShiftDataBtn">Reset all workday tracker data</button>
+    </div>
+  `;
+}
+
+/* ---- CALENDAR ---- */
+function renderDayDetailContent(iso, dow){
+  const chore = CHORES.find(c=>c.dow===dow);
+  const isWeekend = (dow===0 || dow===6);
+  const workoutKey = isWeekend ? "Weekend Gauntlet — 25 min (heavy arms & legs)" : "Weekday Gauntlet — 20 min (cardio, core, light legs/arms)";
+  const workout = WORKOUTS[workoutKey];
+  const act = state.activityLog[iso] || {chore:false, workout:false, meal:false};
+
+  let mealSection = '';
+  if(state.active){
+    const dateObj = new Date(iso+"T00:00:00");
+    const batchDates = getBatchDates(state.active.startDate);
+    const isBatchDayHere = batchDates.some(bd => toLocalISO(bd)===iso);
+    const burritoCount = isWeekend ? 3 : 2;
+    if(isBatchDayHere){
+      mealSection = `<p style="font-size:0.9rem;"><b>🌯 Batch day</b> — make all 4 flavors, 9 of each (36 total)</p>
+      <ol class="steps" style="margin-top:6px;">${MECHANICS.batchPrep.map(s=>`<li>${s}</li>`).join('')}</ol>`;
+    } else if(dateObj < batchDates[0]){
+      mealSection = `<p style="font-size:0.9rem;color:var(--ink-soft);">No stock yet — first batch day is ${fmtDate(toLocalISO(batchDates[0]))}.</p>`;
+    } else {
+      mealSection = `<p style="font-size:0.9rem;"><b>${burritoCount} burritos today</b> — ${isWeekend ? 'breakfast, lunch, supper' : 'breakfast and supper, no lunch burrito'}</p>
+      <ol class="steps" style="margin-top:6px;">${MECHANICS.dailyReheat.map(s=>`<li>${s}</li>`).join('')}</ol>`;
+    }
+  } else {
+    mealSection = `<p style="font-size:0.9rem;color:var(--ink-soft);">Burrito cycle not started — check the Burritos tab whenever you're ready.</p>`;
+  }
+
+  return `<div class="cal-detail" onclick="event.stopPropagation()">
+    <div class="recipe-block">
+      <h4>Deck protocol <span class="tag">${act.chore?'[ SECURED ]':'[ PENDING ]'}</span></h4>
+      <p style="font-size:0.9rem;margin:4px 0;"><b>${chore.task}</b></p>
+      ${chore.details.length?`<ul class="plain">${chore.details.map(d=>`<li>${d}</li>`).join('')}</ul>`:''}
+      <button class="btn small ${act.chore?'ghost':''}" data-activity="chore" data-date="${iso}">${act.chore?'UNDO':'SECURE DECK'}</button>
+    </div>
+    <div class="recipe-block">
+      <h4>Grav-fit drill <span class="tag">${act.workout?'[ SECURED ]':'[ PENDING ]'}</span></h4>
+      <p style="font-size:0.85rem;color:var(--ink-soft);margin:4px 0;">${workoutKey}</p>
+      ${workout.map(ex=>`<p style="margin:6px 0;font-size:0.85rem;"><b>${ex.name}</b> <span class="tag">${ex.meta}</span><br>${ex.how}</p>`).join('')}
+      <button class="btn small ${act.workout?'ghost':''}" data-activity="workout" data-date="${iso}">${act.workout?'UNDO':'LOG DRILL COMPLETE'}</button>
+    </div>
+    <div class="recipe-block">
+      <h4>Galley rations <span class="tag">${act.meal?'[ SECURED ]':'[ PENDING ]'}</span></h4>
+      ${mealSection}
+      <button class="btn small ${act.meal?'ghost':''}" data-activity="meal" data-date="${iso}">${act.meal?'UNDO':'LOG RATIONS'}</button>
+    </div>
+    <button class="btn ghost small" id="closeDayDetail" style="width:100%;">Close</button>
+  </div>`;
+}
+
+function renderCalendar(){
+  const now = new Date();
+  const viewDate = new Date(now.getFullYear(), now.getMonth()+calMonthOffset, 1);
+  const year = viewDate.getFullYear(), month = viewDate.getMonth();
+  const monthName = viewDate.toLocaleDateString('en-CA',{month:'long', year:'numeric'});
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const todayStr = todayISO();
+
+  let doneCount = Object.values(state.choreLog).filter(v=>v).length;
+
+  let cells = '';
+  for(let i=0;i<firstDow;i++) cells += `<div class="cal-cell empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const dateObj = new Date(year, month, d);
+    const iso = toLocalISO(dateObj);
+    const dow = dateObj.getDay();
+    const chore = CHORES.find(c=>c.dow===dow);
+    const isToday = iso===todayStr;
+    const isPayday = PAYDAYS.includes(iso);
+    let isBatchDay = false, planDayLabel = '';
+    if(state.active){
+      const start = new Date(state.active.startDate+"T00:00:00");
+      const dNum = Math.floor((dateObj-start)/86400000)+1;
+      const batchDates = getBatchDates(state.active.startDate);
+      isBatchDay = batchDates.some(bd => toLocalISO(bd)===iso);
+      if(dNum>=1) planDayLabel = `Day ${dNum}`;
+    }
+    const done = !!state.choreLog[iso];
+    const isSelected = selectedCalDate===iso;
+    const dowShort = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][dow];
+    const cellLabel = isBatchDay ? `🌯 Batch day` : chore.task.split(' — ')[0].split(',')[0];
+
+    cells += `<div class="cal-cell ${isToday?'today':''} ${isSelected?'selected':''}" data-daycell="${iso}">
+      <div class="cal-cell-top">
+        <div class="cal-daynum" data-expand="${iso}" style="cursor:pointer;">${dowShort} ${d}</div>
+        <div class="cal-icons">${isPayday?'<span title="Payday">💳</span>':''}${isBatchDay?'<span title="Batch day">🌯</span>':''}</div>
+      </div>
+      <div class="cal-chore" data-expand="${iso}" style="cursor:pointer;">${cellLabel}${planDayLabel?` · ${planDayLabel}`:''}</div>
+      <button class="cal-toggle ${done?'done':''}" data-date="${iso}">${done?'✓ Done':'Mark done'}</button>
+      ${isSelected ? renderDayDetailContent(iso, dow) : ''}
+    </div>`;
+  }
+
+  return `
+    <h1 class="page-title">Mission Log</h1>
+    <p class="page-sub">Chores, batch days, and paydays in one view. Tap a day number to see everything for that day and check things off one at a time.</p>
+    <div class="card">
+      <div class="cal-head">
+        <button class="btn ghost small" id="calPrev">← Prev</button>
+        <h3>${monthName}</h3>
+        <button class="btn ghost small" id="calNext">Next →</button>
+      </div>
+      <div class="cal-grid">
+        ${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="cal-dow">${d}</div>`).join('')}
+        ${cells}
+      </div>
+      <div class="legend"><span>💳 payday</span><span>🌯 batch day</span><span>${doneCount} chores logged done, all-time</span></div>
+    </div>
+  `;
+}
+
+/* ---- BURRITOS ---- */
+function renderPlans(){
+  const totalCost = BURRITO_GROCERY.reduce((a,g)=>a+g[2],0);
+  let html = `<h1 class="page-title">Galley</h1><p class="page-sub">4 flavors, about a month of food, batch-made every 2 weeks. No slow cooker — air fryer and rice cooker only.</p>`;
+
+  html += `<div class="plan-card">
+    <div class="plan-head">
+      <div><h3>Monthly grocery list</h3><p>Buy once, covers both batches (72 burritos — sized for the longest months so you never run short)</p></div>
+      <div style="display:flex;gap:8px;align-items:center;"><span class="tag">$${totalCost.toFixed(2)}</span></div>
+    </div>
+    <div class="plan-body open">
+      <table class="grocery"><tr><th>Item</th><th>Qty</th><th>Price</th></tr>
+        ${BURRITO_GROCERY.map(g=>`<tr><td>${g[0]}</td><td>${g[1]}</td><td>$${g[2].toFixed(2)}</td></tr>`).join('')}
+        <tr><td colspan="2">Total</td><td>$${totalCost.toFixed(2)}</td></tr>
+      </table>
+    </div>
+  </div>`;
+
+  html += `<div class="banner info" style="margin-bottom:16px;"><span>ℹ️</span><div><b>How this runs</b>Every 2 weeks, one batch-prep session makes all 4 flavors — 9 of each, 36 burritos total, frozen individually. Daily: breakfast + supper burrito on weekdays (no lunch burrito), all 3 meals on weekends. Weekly average lands around 2,020 cal/day.</div></div>`;
+
+  html += `<div class="eyebrow">The 4 flavors (${BURRITOS.reduce((a,b)=>a+BURRITOS_PER_FLAVOR_PER_BATCH,0)} burritos per batch, every 2 weeks)</div>`;
+  html += `<div class="banner info" style="margin-bottom:12px;"><span>🥄</span><div><b>How to measure</b>Every amount uses your ½ cup measuring cup, called a "scoop". <b>Level scoop</b> = filled to the rim, then scraped flat with a knife. <b>Half-full scoop</b> = filled to halfway. <b>Heaping scoop</b> = piled in a small mound above the rim. <b>1½ scoops</b> = 1 level scoop + 1 half-full scoop. Do not press shredded cheese down. Potato is measured cooked. Sausage links and bacon slices are counted. These are close estimates, so a tiny difference between burritos is fine.</div></div>`;
+  BURRITOS.forEach(b=>{
+    html += `<div class="recipe-block"><h4>${b.name} <span class="tag">~${b.cal} cal</span></h4>
+      <p style="font-size:0.85rem;color:var(--ink-soft);margin:4px 0;">Per burrito: ${b.perBurrito}</p>
+      <p style="font-size:0.85rem;margin:4px 0;"><b>Total for 9 burritos:</b> ${b.mix}</p>
+    </div>`;
+  });
+
+  html += `<div class="card"><h3>Batch-prep steps (every 2 weeks)</h3><ol class="steps">${MECHANICS.batchPrep.map(s=>`<li>${s}</li>`).join('')}</ol></div>`;
+  html += `<div class="card"><h3>Daily reheat (any burrito, any meal)</h3><ol class="steps">${MECHANICS.dailyReheat.map(s=>`<li>${s}</li>`).join('')}</ol></div>`;
+
+  if(!state.active){
+    html += `<button class="btn start-plan" data-plan="burritos">Start the monthly cycle</button>`;
+  }
+  if(openPlanId==='__start__'){
+    html += renderStartPanel();
+  }
+  return html;
+}
+
+function renderStartPanel(){
+  return `<div class="card" id="startPanel">
+    <h3>Start the monthly burrito cycle</h3>
+    <p style="color:var(--ink-soft);font-size:0.9rem;">Your day counter starts today. Your first batch-prep day is today, then again 14 days later — 2 batches total across the month. Your existing food doesn't go anywhere — this just tracks the new cycle.</p>
+    <button class="btn" id="confirmStartBtn">Confirm & start today</button>
+    <button class="btn ghost" id="cancelStartBtn" style="margin-left:8px;">Cancel</button>
+  </div>`;
+}
+
+/* ---- ROUTINE ---- */
+function renderRoutine(){
+  const dow = new Date().getDay();
+  let html = `<h1 class="page-title">Daily Routine</h1><p class="page-sub">Your existing life schedule, with today highlighted.</p>`;
+
+  // If the burrito cycle is active and today is a batch-prep day, surface it here too —
+  // not just on the Today tab — since this is the schedule view people check for "what's today look like."
+  if(state.active){
+    const ci = cycleInfo();
+    if(ci && ci.isBatchDay){
+      html += `<div class="banner info"><span>🌯</span><div><b>Today is a batch-prep day</b>Make all 4 flavors — see the Burritos tab for the full steps, or the Today tab for the quick version.</div></div>`;
+    }
+  }
+
+  html += `<div class="card"><h3>Weekday chain (Mon–Fri)</h3><ul class="plain">
+    ${WEEKDAY_CHAIN.map(w=>`<li><b>${w.t}</b> — ${w.d}</li>`).join('')}
+  </ul></div>`;
+
+  html += `<div class="grid-2">
+    <div class="card"><h3>Saturday</h3><ul class="plain">${WEEKEND_SCHEDULE.Saturday.map(w=>`<li><b>${w.t}</b> — ${w.d}</li>`).join('')}</ul></div>
+    <div class="card"><h3>Sunday</h3><ul class="plain">${WEEKEND_SCHEDULE.Sunday.map(w=>`<li><b>${w.t}</b> — ${w.d}</li>`).join('')}</ul></div>
+  </div>`;
+
+  html += `<div class="card"><h3>Weekly chore rotation</h3><table class="chore-table">
+    <tr><th>Day</th><th>Chore</th></tr>
+    ${CHORES.map(c=>`<tr class="${c.dow===dow?'today':''}"><td>${c.day}${c.dow===dow?' (today)':''}</td><td><b>${c.task}</b>${c.details.length?`<ul class="plain">${c.details.map(d=>`<li>${d}</li>`).join('')}</ul>`:''}</td></tr>`).join('')}
+  </table></div>`;
+
+  html += Object.keys(WORKOUTS).map(k=>`<div class="card"><h3>${k}</h3>${WORKOUTS[k].map(ex=>`
+    <div class="recipe-block">
+      <h4>${ex.name} <span class="tag">${ex.meta}</span></h4>
+      <p style="margin:4px 0;font-size:0.9rem;"><b>How to do it:</b> ${ex.how}</p>
+      <p style="margin:0;font-size:0.85rem;color:var(--ink-soft);"><b>Purpose:</b> ${ex.purpose}</p>
+    </div>`).join('')}</div>`).join('');
+
+  return html;
+}
+
+/* ---- GUIDE ---- */
+function renderGuide(){
+  return `
+    <h1 class="page-title">Complete Guide</h1>
+    <p class="page-sub">Read this once. After that, you shouldn't need to think — just follow it.</p>
+
+    <div class="card">
+      <h3>Part 1 — What This Actually Is</h3>
+      <p style="font-size:0.93rem;">This app does two things: <b>tells you what to eat and when</b> (4 burrito flavors, batch-made every 2 weeks), and <b>tracks your progress</b> — what day you're on, when your next batch day is, when chores are done — so you don't have to remember it yourself. You only ever use two tools: air fryer and rice cooker. No stovetop, no slow cooker. Batch-prep happens once every 2 weeks (2 sessions a month) — everything else is just unwrapping a frozen burrito and air-frying it.</p>
+    </div>
+
+    <div class="card">
+      <h3>Part 2 — The Four Things You Ever Need To Decide</h3>
+      <table class="chore-table">
+        <tr><th>Question</th><th>Where the answer lives</th></tr>
+        <tr><td>"Have I started the cycle?"</td><td>You start it once, in <b>Burritos</b>. Then you don't touch it for about a month.</td></tr>
+        <tr><td>"What do I eat right now?"</td><td><b>Today</b> tab tells you how many burritos and which meals.</td></tr>
+        <tr><td>"Is today a chore/batch day?"</td><td><b>Today</b> and <b>Calendar</b> both show this automatically.</td></tr>
+        <tr><td>"Do I need groceries soon?"</td><td><b>Today</b> warns you 1 week before you run out.</td></tr>
+      </table>
+      <p style="font-size:0.9rem;color:var(--ink-soft);margin-top:10px;">That's the whole system. You're never supposed to sit and think "what should I make." The app already decided.</p>
+    </div>
+
+    <div class="banner info">
+      <span>📏</span>
+      <div><b>About the amounts</b>
+      All 4 flavors are sized to ~790-960 cal each. Every 2 weeks, one batch-prep session makes 9 of each flavor — 36 burritos total — enough for the next 14 days exactly. Across a month that's 2 batches, 72 burritos (sized for the longest months — shorter months just bank a few spares), averaging about 2,020 cal/day between breakfast, weekday supper, and all 3 weekend meals. You never need to guess portions — the grocery list and batch instructions are already sized for the whole cycle.</div>
+    </div>
+
+    <div class="card">
+      <h3>Part 3 — Starting The Cycle</h3>
+      <p style="font-size:0.9rem;color:var(--ink-soft);">Do this the first time, and again every month when a cycle ends.</p>
+      <ol class="steps">
+        <li>Tap <b>Burritos</b> in the sidebar.</li>
+        <li>Check the grocery list, buy everything for the month.</li>
+        <li>Tap <b>Start the monthly cycle</b>.</li>
+        <li>Tap <b>Confirm & start today</b>. Your first batch-prep day is today if it's a Saturday, or the coming Saturday otherwise — batch days always land on Saturdays, every 2 weeks.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h3>Part 4 — Batch-Prep Day (Every 2 Weeks, Saturday)</h3>
+      <p style="font-size:0.9rem;color:var(--ink-soft);">The same process every batch day, twice a month — makes all 4 flavors, 36 burritos, enough for 2 weeks:</p>
+      <ol class="steps">${MECHANICS.batchPrep.map(s=>`<li>${s}</li>`).join('')}</ol>
+      <p style="font-size:0.9rem;color:var(--ink-soft);">Budget about 5½-6 hours total, start to finish. The air fryer is the slow part because it only does one round at a time: about 10 rounds of bacon (roughly 90 min), 8 rounds of sausage (roughly 90 min) and 6 rounds of potato (roughly 85 min). Do the other jobs while it runs: shred all the cheese (about 40 min), dice the potatoes (about 30 min) and move each cooled round into the fridge. Once everything is cooked, assembling, wrapping and labelling the 36 burritos takes about 1 hour. These times are estimates for a standard square basket, so time your first round of each food and adjust. The Today tab and Calendar both flag batch days automatically — you never need to track it yourself.</p>
+    </div>
+
+    <div class="card">
+      <h3>Part 5 — Your Actual Day: Breakfast, Lunch, Supper</h3>
+      <ul class="plain">
+        <li><b>Breakfast, every day:</b> 1 burrito, any flavor, air fryer.</li>
+        <li><b>Weekdays (Mon-Fri):</b> no lunch burrito — lunch is separate, handled on its own. Supper is 1 burrito.</li>
+        <li><b>Weekends (Sat-Sun):</b> 1 burrito each for breakfast, lunch, and supper — 3 total.</li>
+      </ul>
+      <p style="font-size:0.9rem;color:var(--ink-soft);">Reheating is the same every time, any flavor, any meal:</p>
+      <ol class="steps">${MECHANICS.dailyReheat.map(s=>`<li>${s}</li>`).join('')}</ol>
+      <p style="font-size:0.9rem;color:var(--ink-soft);">That's genuinely it. No thawing, no stovetop, no weekday cooking beyond 12-15 min in the air fryer.</p>
+    </div>
+
+    <div class="card">
+      <h3>Part 6 — When To Buy More Groceries</h3>
+      <p style="font-size:0.93rem;">The app tells you. <b>1 week before your monthly cycle ends</b>, the Today tab shows an orange banner with days left and your real next payday date. When you see it: open <b>Burritos</b>, use the grocery list for your next order — it's already sized for the month, both batches. Want changes to the flavors or amounts? Come back to this chat and I'll update the app.</p>
+    </div>
+
+    <div class="card">
+      <h3>Part 7 — How This Fits Your Daily Schedule</h3>
+      <p style="font-size:0.93rem;">Check the <b>Routine</b> tab for your full weekday chain, weekend schedule, chore rotation, and both workout programs with full how-to instructions.</p>
+      <ul class="plain">
+        <li><b>Every morning:</b> breakfast burrito, 12-15 min in the air fryer while you get ready.</li>
+        <li><b>7:55-8:15 PM weekdays:</b> supper burrito.</li>
+        <li><b>Weekends:</b> add a lunch burrito too — one midday during D&D on Saturday, one around 12:15 PM on Sunday.</li>
+        <li><b>Saturday mornings, every 2 weeks:</b> batch-prep day instead of just a single reheat — about 5½-6 hours.</li>
+        <li><b>Before anything else, every day:</b> feed and water Storm.</li>
+      </ul>
+      <p style="font-size:0.9rem;color:var(--ink-soft);">The <b>Calendar</b> tab shows chores, batch days (🌯), and paydays (💳) in a full month view — tap "Mark done" on any day to log it forever.</p>
+    </div>
+
+    <div class="card">
+      <h3>Part 8 — If Something Goes Wrong</h3>
+      <ul class="plain">
+        <li><b>Missed a batch day?</b> Make the batch whenever you catch it — the freezer just runs a little thinner until then.</li>
+        <li><b>Ran out early?</b> Not a failure — just means the next batch day moves up a bit, or lean on whatever's around in the meantime.</li>
+        <li><b>App not saving?</b> Make sure you're opening it via your phone's home screen icon (Safari/Chrome), not the Claude app.</li>
+        <li><b>Missed a day, don't know what "Day" you're on?</b> Doesn't matter — the app calculates it from your real start date automatically.</li>
+        <li><b>Want to change a flavor or amount?</b> Come back to this chat and tell me — I'll update the app for you.</li>
+      </ul>
+    </div>
+
+    <div class="banner done">
+      <span>📌</span>
+      <div><b>One-Page Cheat Sheet</b>
+      Every day: breakfast burrito. Weekdays: + supper burrito, no lunch. Weekends: + lunch and supper burritos, 3 total. Every 2 weeks (Saturday): batch-prep day, makes 36 burritos for the next 2 weeks. 1 week before the month ends: restock groceries. Feed Storm first, always.
+      </div>
+    </div>
+  `;
+}
+
+/* ---- PAYDAYS ---- */
+function renderPaydays(){
+  const np = nextPayday();
+  const t = todayISO();
+  let html = `<h1 class="page-title">Credits &amp; Fuel Reserves</h1><p class="page-sub">2026 payday calendar — every second Thursday. Useful for timing your next grocery restock.</p>`;
+  html += `<div class="payday-grid">${PAYDAYS.map(p=>`<div class="payday-pill ${p===np?'next':(p<t?'past':'')}">${fmtDate(p)}${p===np?' · next':''}</div>`).join('')}</div>`;
+  if(np){
+    html += `<div class="banner info" style="margin-top:20px;"><span>💳</span><div><b>Next payday: ${fmtDate(np)}</b>If your current cycle is ending soon, this is a solid day to place the next grocery order.</div></div>`;
+  }
+  return html;
+}
+
+/* ============================= EVENTS ============================= */
+function wireTabEvents(){
+  document.querySelectorAll('[data-goto]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const goingToCalendar = el.dataset.goto === 'calendar';
+      state.tab = el.dataset.goto;
+      if(goingToCalendar){
+        calMonthOffset = 0;
+        selectedCalDate = null;
+        scrollToTodayFlag = true;
+      }
+      render();
+    });
+  });
+  document.querySelectorAll('.start-plan').forEach(el=>{
+    el.addEventListener('click', ()=>{ openPlanId='__start__'; renderTab();
+      setTimeout(()=>{ const sp = document.getElementById('startPanel'); if(sp && typeof sp.scrollIntoView === 'function'){ sp.scrollIntoView({behavior:'smooth', block:'center'}); } }, 50);
+    });
+  });
+  const confirmBtn = document.getElementById('confirmStartBtn');
+  if(confirmBtn){
+    confirmBtn.addEventListener('click', async ()=>{
+      try{
+        confirmBtn.disabled = true; confirmBtn.textContent = 'Starting…';
+        state.active = { startDate: todayISO() };
+        await persist();
+        openPlanId = null; state.tab='today'; render();
+      }catch(e){
+        saveError = 'Starting the cycle hit a snag: ' + e.message + ' — nothing was lost, just try tapping the button again.';
+        confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm & start today';
+        renderTab();
+      }
+    });
+  }
+  const cancelBtn = document.getElementById('cancelStartBtn');
+  if(cancelBtn){ cancelBtn.addEventListener('click', ()=>{ openPlanId=null; renderTab(); }); }
+
+  const retryBtn = document.getElementById('retrySaveBtn');
+  if(retryBtn){
+    retryBtn.addEventListener('click', async ()=>{ await persist(); renderTab(); });
+  }
+  const resetShiftBtn = document.getElementById('resetShiftDataBtn');
+  if(resetShiftBtn){
+    resetShiftBtn.addEventListener('click', async ()=>{
+      const sure = window.confirm('Clear all Finished/Missed/Excused history and hourly check-ins? This resets your streak to 0 and can\'t be undone.');
+      if(!sure) return;
+      state.shiftLog = {};
+      await persist();
+      renderTab();
+    });
+  }
+  const exportBtn = document.getElementById('exportBackupBtn');
+  if(exportBtn){
+    exportBtn.addEventListener('click', ()=>{
+      const payload = { active: state.active, choreLog: state.choreLog, activityLog: state.activityLog, shiftLog: state.shiftLog };
+      const text = JSON.stringify(payload);
+      const wrap = document.getElementById('backupOutputWrap');
+      const out = document.getElementById('backupOutput');
+      if(wrap && out){
+        wrap.style.display = 'block';
+        out.value = text;
+        out.focus();
+        out.select();
+        // Try the clipboard API too (works in most contexts, but not guaranteed on file:// pages) — the visible
+        // selected textarea above is the reliable fallback either way, so this is just a nice-to-have.
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(text).catch(()=>{ /* fine, manual copy still works */ });
+        }
+      }
+    });
+  }
+  const restoreBtn = document.getElementById('restoreBackupBtn');
+  if(restoreBtn){
+    restoreBtn.addEventListener('click', async ()=>{
+      const input = document.getElementById('backupInput');
+      const raw = input ? input.value.trim() : '';
+      if(!raw){ saveError = 'Paste your backup text into the box first.'; renderTab(); return; }
+      let parsed;
+      try{ parsed = JSON.parse(raw); }
+      catch(e){ saveError = 'That doesn\'t look like a valid backup — make sure you copied the whole thing.'; renderTab(); return; }
+      const sure = window.confirm('Restore this backup? It will replace everything currently in the app (plan, chores, workouts, streak).');
+      if(!sure) return;
+      state.active = parsed.active || null;
+      state.choreLog = parsed.choreLog || {};
+      state.activityLog = parsed.activityLog || {};
+      state.shiftLog = parsed.shiftLog || {};
+      await persist();
+      renderTab();
+    });
+  }
+  const calPrev = document.getElementById('calPrev');
+  if(calPrev){ calPrev.addEventListener('click', ()=>{ calMonthOffset--; renderTab(); }); }
+  const calNext = document.getElementById('calNext');
+  if(calNext){ calNext.addEventListener('click', ()=>{ calMonthOffset++; renderTab(); }); }
+  document.querySelectorAll('.cal-toggle').forEach(el=>{
+    el.addEventListener('click', async (ev)=>{
+      ev.stopPropagation();
+      const date = el.dataset.date;
+      state.choreLog[date] = !state.choreLog[date];
+      await persist();
+      renderTab();
+    });
+  });
+  document.querySelectorAll('[data-expand]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const d = el.dataset.expand;
+      selectedCalDate = selectedCalDate===d ? null : d;
+      renderTab();
+    });
+  });
+  const closeDetail = document.getElementById('closeDayDetail');
+  if(closeDetail){ closeDetail.addEventListener('click', ()=>{ selectedCalDate = null; renderTab(); }); }
+  document.querySelectorAll('[data-activity]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const date = el.dataset.date;
+      const key = el.dataset.activity;
+      if(!state.activityLog[date]) state.activityLog[date] = {chore:false, workout:false, meal:false};
+      state.activityLog[date][key] = !state.activityLog[date][key];
+      await persist();
+      renderTab();
+    });
+  });
+  document.querySelectorAll('.shift-hour').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const dateKey = todayISO();
+      if(!state.shiftLog[dateKey]) state.shiftLog[dateKey] = { hours:[false,false,false,false,false,false,false,false], break1:false, break2:false, lunch:false, deskTidy:false, status:null };
+      const day = state.shiftLog[dateKey];
+      if(el.dataset.hour !== undefined){
+        const idx = parseInt(el.dataset.hour,10);
+        day.hours[idx] = !day.hours[idx];
+      } else if(el.dataset.break){
+        const key = el.dataset.break;
+        day[key] = !day[key];
+      }
+      await persist();
+      renderTab();
+    });
+  });
+  document.querySelectorAll('[data-clockin]').forEach(el=>{ el.addEventListener('click', async ()=>{ const d=ensureDay(todayISO()); d.clockIn=Date.now(); await persist(); renderTab(); }); });
+  document.querySelectorAll('[data-standdown]').forEach(el=>{ el.addEventListener('click', async ()=>{ const d=ensureDay(todayISO()); d.status='finished'; d.clockOut=Date.now(); await persist(); showStandDown(); renderTab(); }); });
+  document.querySelectorAll('[data-override]').forEach(el=>{ el.addEventListener('click', async ()=>{ const d=ensureDay(todayISO()); d.override=true; await persist(); renderTab(); }); });
+  document.querySelectorAll('[data-status]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const dateKey = todayISO();
+      if(!state.shiftLog[dateKey]) state.shiftLog[dateKey] = { hours:[false,false,false,false,false,false,false,false], break1:false, break2:false, lunch:false, deskTidy:false, status:null };
+      const val = el.dataset.status;
+      state.shiftLog[dateKey].status = val === '' ? null : val;
+      await persist();
+      renderTab();
+    });
+  });
+}
+
+/* ============================= GLOBAL SAFETY NET ============================= */
+// If any click handler or async task throws an error we didn't anticipate,
+// surface it visibly instead of the button silently doing nothing.
+window.addEventListener('error', (e)=>{
+  saveError = 'Something unexpected went wrong: ' + (e.message || 'unknown error') + '. Try the action again — nothing entered is lost.';
+  try{ renderTab(); }catch(_){}
+});
+window.addEventListener('unhandledrejection', (e)=>{
+  saveError = 'Something unexpected went wrong: ' + (e.reason && e.reason.message ? e.reason.message : 'unknown error') + '. Try the action again — nothing entered is lost.';
+  try{ renderTab(); }catch(_){}
+});
+
+/* ============================= INIT ============================= */
+(async function init(){
+  await loadState();
+  render();
+})();
+</script>
+<script>if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){ navigator.serviceWorker.register('rcs1-sw.js').catch(function(){}); }</script>
+</body>
+</html>
