@@ -207,7 +207,7 @@ body{background:var(--bg);font-size:14px;}
 <script>
 /* ============================= DATA ============================= */
 
-const PAYDAYS = ["2026-07-23","2026-08-06","2026-08-20","2026-09-03","2026-09-17","2026-10-01","2026-10-15","2026-10-29","2026-11-12","2026-11-26","2026-12-10","2026-12-24"];
+const PAYDAYS = (function(){ const out=[]; const d=new Date(2026,6,23); for(let i=0;i<400;i++){ out.push(toLocalISO(d)); d.setDate(d.getDate()+14); } return out; })(); // every second Thursday from 2026-07-23, about 15 years ahead
 
 const WEEKDAY_CHAIN = [
   {t:"7:45–8:20 AM", d:"Wake up, refresh Storm's water bowl. Start the air fryer for today's breakfast burrito right away (12-15 min) — shower and get dressed while it cooks, then eat before you head out."},
@@ -471,7 +471,7 @@ function render(){
       ${navItem('paydays','¤','Credits')}
       ${navItem('stats','∿','Stats')}
       ${navItem('guide','?','Manual')}
-      <div class="sidebar-foot" id="sidebarFoot">Vessel RCS-1 · Crew: JT + Storm · build 3</div>
+      <div class="sidebar-foot" id="sidebarFoot">Vessel RCS-1 · Crew: JT + Storm · build 4</div>
     </nav>
     <main id="main"></main>
   `;
@@ -539,7 +539,7 @@ function getShiftDay(dateKey){
 function computeStreak(){
   let streak = 0;
   let d = new Date();
-  for(let i=0; i<60; i++){
+  for(let i=0; i<4000; i++){
     const dow = d.getDay();
     if(dow===0 || dow===6){ d.setDate(d.getDate()-1); continue; } // weekends never count, never break the streak
     const key = toLocalISO(d);
@@ -644,6 +644,24 @@ function shiftClockBlock(day){
   return `<div style="margin:6px 0 12px;"><div class="eyebrow">[ ALL HANDS — SHIFT ACTIVE ]</div><div id="shiftClock" data-start="${day.clockIn}">--:--:--</div><button class="btn" data-standdown="1" style="width:100%;">SHIFT COMPLETE — STAND DOWN</button></div>`;
 }
 function showStandDown(){ const o=document.createElement('div'); o.className='overlay'; o.innerHTML='[ STAND DOWN ]<br><br>BATTLE STATIONS UNLOCKED<br>DECK MAINTENANCE MODE ONLINE'; document.body.appendChild(o); setTimeout(()=>o.remove(),2300); }
+function shiftTally(){
+  const allDays=Object.keys(state.shiftLog); let fin=0,mis=0,exc=0;
+  if(allDays.length){
+    const earliest=allDays.slice().sort()[0];
+    let d=new Date(earliest+"T00:00:00");
+    const yesterday=new Date(); yesterday.setDate(yesterday.getDate()-1); yesterday.setHours(0,0,0,0);
+    while(d<=yesterday){
+      const dow=d.getDay();
+      if(dow===0||dow===6){ d.setDate(d.getDate()+1); continue; }
+      const day=getShiftDay(toLocalISO(d));
+      if(day.status==='finished')fin++; else if(day.status==='excused')exc++; else mis++;
+      d.setDate(d.getDate()+1);
+    }
+    const t=getShiftDay(todayISO()), tdow=new Date().getDay();
+    if(tdow>=1&&tdow<=5){ if(t.status==='finished')fin++; else if(t.status==='excused')exc++; else if(t.status==='missed')mis++; }
+  }
+  return {fin,mis,exc};
+}
 function renderBridge(){
   const iso=todayISO(), dow=new Date().getDay(), wk=isWeekdayNow();
   const act=state.activityLog[iso]||{}, day=state.shiftLog[iso]||{};
@@ -661,7 +679,7 @@ function renderBridge(){
   else if(unlocked&&!act.workout) next='GRAV-FIT DRILL';
   else if(wk&&!day.deskTidy&&day.clockIn) next='SECURE WORKSTATION';
   else if(!unlocked) next='STANDBY — COMPLETE SHIFT TO UNLOCK EVENING PROTOCOLS';
-  let fin=0,mis=0,exc=0; Object.values(state.shiftLog).forEach(v=>{ if(v.status==='finished')fin++; else if(v.status==='missed')mis++; else if(v.status==='excused')exc++; });
+  const {fin,mis,exc}=shiftTally();
   const chore=(typeof CHORES!=='undefined'&&CHORES.find(c=>c.dow===dow))||null;
   const row=(key,label,doneTxt,warnTxt,locked,sub)=>{
     const d=!!act[key];
@@ -1161,8 +1179,10 @@ function renderGuide(){
 function renderPaydays(){
   const np = nextPayday();
   const t = todayISO();
-  let html = `<h1 class="page-title">Credits &amp; Fuel Reserves</h1><p class="page-sub">2026 payday calendar — every second Thursday. Useful for timing your next grocery restock.</p>`;
-  html += `<div class="payday-grid">${PAYDAYS.map(p=>`<div class="payday-pill ${p===np?'next':(p<t?'past':'')}">${fmtDate(p)}${p===np?' · next':''}</div>`).join('')}</div>`;
+  const _lo=new Date(); _lo.setDate(_lo.getDate()-30); const lo=toLocalISO(_lo);
+  const _hi=new Date(); _hi.setDate(_hi.getDate()+365); const hi=toLocalISO(_hi);
+  let html = `<h1 class="page-title">Credits &amp; Fuel Reserves</h1><p class="page-sub">Payday calendar — every second Thursday. Showing the last month and the next 12 months. Useful for timing your next grocery restock.</p>`;
+  html += `<div class="payday-grid">${PAYDAYS.filter(p=>p>=lo&&p<=hi).map(p=>`<div class="payday-pill ${p===np?'next':(p<t?'past':'')}">${fmtDate(p)}${p===np?' · next':''}</div>`).join('')}</div>`;
   if(np){
     html += `<div class="banner info" style="margin-top:20px;"><span>💳</span><div><b>Next payday: ${fmtDate(np)}</b>If your current cycle is ending soon, this is a solid day to place the next grocery order.</div></div>`;
   }
